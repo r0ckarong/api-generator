@@ -260,6 +260,7 @@ def include(node, newline):
             include += '\n'
         print(include)
 
+#TODO add spaced indent
 
 def define(node, newline):
     if not functions_only:
@@ -520,15 +521,26 @@ def function(node, semicolon, newline, out = True):
     else:
         return function
 
+#TODO implement banner comments
+#TODO implement javadoc comments
+#TODO fix line prefixing
 
 def comment(node, newline):
-    comment = '// '
+    lead = ''
+    print(node.attrib.get('form'))
+    form = node.attrib.get('form')
+    if form == "verbatim":
+        lead = ''
+    elif form == "javadoc":
+        lead = '/* '
+    elif form == "standard":
+        lead = '// '
     if node.text:
         lines = node.text.split('\n')
-        comment += '\n// '.join(lines)
+        comment = '\n%s '%(lead).join(lines)
     if newline:
         comment += '\n'
-    print(comment)
+    print(f'{comment}')
 
 
 def block(node):

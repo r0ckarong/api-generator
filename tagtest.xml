@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<interface><!--std="C17"-->
+  <comment form="verbatim">/**************************************************************************************
+  Copyright (c) Hilscher Gesellschaft fuer Systemautomation mbH. All Rights Reserved.
+  ***************************************************************************************
+    $HeadURL$: *//*!
+
+    \file Hil_Taglist.h
+
+    The Hilscher tag list is a data structure which can be added to the binary firmware
+    file. The data which is stored within this list can be manipulated via a special
+    tag list editor tool without recompiling the firmware itself.
+
+    The firmware also can access the data of the tag list and use the data to accept
+    behavior or configurations which is compiled into the firmware binary.
+
+    This file defines all related tag codes and structures.
+
+  **************************************************************************************/
+  </comment>
+
+  <guard form="defined">HIL_TAGLIST_H_
+
+    <include form="angle">stdint.h</include>
+    <include form="quote">Hil_Compiler.h</include>
+
+    <comment form="verbatim">
+    /**************************************************************************************
+    Tag type code ranges and segmentation.
+    **************************************************************************************/
+    </comment>
+
+    <comment>/** Tag type code modifier, if set the tag shall be ignored by the firmware */</comment>
+    <define>HIL_TAG_IGNORE_FLAG<value>0x80000000</value></define>
+
+    <comment>/** Tag type mask */</comment>
+    <define>HIL_TAG_MASK<value>0x7FFFFFFF</value></define>
+
+    <comment>/* Tag type ranges */</comment>
+    <define>HIL_TAG_SPECIAL_START<value>0x00000000</value></define>
+    <define>HIL_TAG_SPECIAL_END<value>0x000007FF</value></define>
+    <define>HIL_TAG_GENERAL_START<value>0x00000800</value></define>
+    <define>HIL_TAG_GENERAL_END<value>0x00000FFF</value></define>
+    <define>HIL_TAG_FIRMWARE_START<value>0x00001000</value></define>
+    <define>HIL_TAG_FIRMWARE_END<value>0x0FFFFFFF</value></define>
+    <define>HIL_TAG_FACILITY_START<value>0x10000000</value></define>
+    <define>HIL_TAG_FACILITY_END<value>0x1FFFFFFF</value></define>
+    <define>HIL_TAG_USER_START<value>0x20000000</value></define>
+    <define>HIL_TAG_USER_END<value>0x2FFFFFFF</value></define>
+    <define>HIL_TAG_PROTOCOL_START<value>0x30000000</value></define>
+    <define>HIL_TAG_PROTOCOL_END<value>0x3FFFFFFF</value></define>
+    <define>HIL_TAG_BSL_START<value>0x40000000</value></define>
+    <define>HIL_TAG_BSL_END<value>0x4FFFFFFF</value></define>
+
+    <comment form="banner">
+    /**************************************************************************************
+  Tag type codes.
+  NOTE: New tag codes are coordinated by the netX tools department (NXT).
+**************************************************************************************/
+</comment>
+
+<comment>/* Tag types from the special tag code range */</comment>
+  <define>HIL_TAG_END_OF_LIST<value>0x00000000</value></define>
+
+  <comment>/* Tag types from the general tag code range */</comment>
+  <define>HIL_TAG_MEMSIZE<value>0x00000800</value></define>
+  <define>HIL_TAG_MIN_PERSISTENT_STORAGE_SIZE<value>0x00000801</value></define>
+  <define>HIL_TAG_MIN_OS_VERSION<value>0x00000802</value></define>
+  <define>HIL_TAG_MAX_OS_VERSION<value>0x00000803</value></define>
+  <define>HIL_TAG_MIN_CHIP_REV<value>0x00000804</value></define>
+  <define>HIL_TAG_MAX_CHIP_REV<value>0x00000805</value></define>
+  <define>HIL_TAG_NUM_COMM_CHANNEL<value>0x00000806</value></define>
+  <comment>/* deprecated */</comment>
+  </guard>
+
+</interface>
