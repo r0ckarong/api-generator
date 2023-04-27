@@ -28,6 +28,7 @@ import json
 import sys
 
 
+lead = '/*'
 indent = '  '
 prefix = ''
 functions_only = False
@@ -80,7 +81,7 @@ class DoxygenParam:
 
 class Doxygen:
     brief = None
-    detail = None
+    details = None
     params = []
     ret = None
     see = None
@@ -96,11 +97,11 @@ class Doxygen:
                 self.brief = brief.text
             else:
                 self.brief = None
-            detail = node.find('detail')
-            if None != detail:
-                self.detail = detail.text
+            details = node.find('details')
+            if None != details:
+                self.details = details.text
             else:
-                self.detail = None
+                self.details = None
             ret = node.find('return')
             if None != ret:
                 self.ret = ret.text
@@ -113,38 +114,41 @@ class Doxygen:
                 self.see = None
         else:
             self.brief = None
-            self.detail = None
+            self.details = None
             self.ret = None
             self.see = None
 
     def empty(self):
-        if None == self.brief and None == self.detail and 0 == \
+        if None == self.brief and None == self.details and 0 == \
                 len(self.params) and None == self.ret and None == self.see:
             return True
         return False
 
+    #TODO make the description texts configurable the triple slash is not nice\
+    #Maybe make the comment format configurable globally
+
     def output(self):
         sections = []
         if None != self.brief:
-            sections.append('/// ' + '@brief ' + replace_prefix(self.brief) + '\n')
-        if None != self.detail:
-            detail = ''
-            for line in self.detail.split('\n'):
-                detail += '/// ' + line + '\n'
-            sections.append(replace_prefix(detail))
+            sections.append(lead + '@brief ' + replace_prefix(self.brief) + '\n')
+        if None != self.details:
+            details = ''
+            for line in self.details.split('\n'):
+                details += lead + line + '\n'
+            sections.append(replace_prefix(details))
         if 0 != len(self.params):
             param_section = ''
             for param in self.params:
-                param_section += '/// ' + param + '\n'
+                param_section += lead + param + '\n'
             if '' != param_section:
                 sections.append(replace_prefix(param_section))
         if None != self.ret:
-            sections.append('/// @return ' + replace_prefix(self.ret) + '\n')
+            sections.append(lead + ' @return ' + replace_prefix(self.ret) + '\n')
         if None != self.see:
-            sections.append('/// @see ' + replace_prefix(self.see) + '\n')
+            sections.append(lead + ' @see ' + replace_prefix(self.see) + '\n')
         text = ''
         if 0 != len(sections):
-            text = '///\n'.join(sections)
+            text = lead + '\n'.join(sections)
         return text.strip()
 
 
@@ -260,7 +264,7 @@ def include(node, newline):
             include += '\n'
         print(include)
 
-#TODO add spaced indent
+#TODO add correctly spaced indent
 
 def define(node, newline):
     if not functions_only:
@@ -281,11 +285,16 @@ def define(node, newline):
                 define += continuation + indent + (continuation + indent).join(lines)
             elif 1 == len(lines):
                 define += ' ' + lines[0]
+        comment = node.find('comment')
+        if None != comment:
+            comment = ' ' + comment.text
+        else:
+            comment = ''
         if newline:
             define += '\n'
         if not docs.empty():
             print(docs.output())
-        print(define)
+        print(define + comment)
 
 
 def struct(node, semicolon, newline):
@@ -294,9 +303,10 @@ def struct(node, semicolon, newline):
         struct = 'struct'
         if node.text:
             name = replace_prefix(node.text.strip())
-            if not is_identifier(name):
-                raise Exception('invalid struct name: ' + name)
-            struct += ' ' + name
+            # if not is_identifier(name):
+            #     raise Exception('invalid struct name: ' + name)
+            if None != name:
+              struct += ' ' + name
         scope = node.find('scope')
         # TODO Output nice diagnostics for unexpected input, use is_identifier()
         if None != scope:
@@ -342,7 +352,7 @@ def struct(node, semicolon, newline):
                             member_decls.append(union_decl)
                 if 0 < len(member_decls):
                     struct += '\n' + ';\n'.join(member_decls) + ';\n'
-                struct += '}'
+                struct += '} '
         if semicolon:
             struct += ';'
         if newline:
@@ -451,11 +461,12 @@ def typedef(node, newline):
         if '' != docs:
             print(docs.output())
         sys.stdout.write('typedef ')
-        if None != type.getchildren():
+        dir(type)
+        if None != list(type):
             generate(type, False, False)
             if None != type.text:
                 sys.stdout.write(replace_prefix(type.text.strip()))
-            sys.stdout.write(' ' + name);
+            sys.stdout.write(name);
         print(';\n')
 
 
@@ -527,7 +538,6 @@ def function(node, semicolon, newline, out = True):
 
 def comment(node, newline):
     lead = ''
-    print(node.attrib.get('form'))
     form = node.attrib.get('form')
     if form == "verbatim":
         lead = ''
@@ -537,10 +547,10 @@ def comment(node, newline):
         lead = '// '
     if node.text:
         lines = node.text.split('\n')
-        comment = '\n%s '%(lead).join(lines)
+        comment = lead + '\n'.join(lines)
     if newline:
         comment += '\n'
-    print(f'{comment}')
+    print(comment)
 
 
 def block(node):
